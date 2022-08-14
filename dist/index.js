@@ -10,26 +10,14 @@ var __createBinding = (this && this.__createBinding) || (Object.create ? (functi
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
 }));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
 var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.version = exports.interfaces = exports.enums = exports.constants = exports.plugins = void 0;
+exports.version = void 0;
 __exportStar(require("./structures"), exports);
-exports.plugins = __importStar(require("./plugins"));
-exports.constants = __importStar(require("./ts/constants"));
-exports.enums = __importStar(require("./ts/enums"));
-exports.interfaces = __importStar(require("./ts/interfaces"));
+__exportStar(require("./plugins"), exports);
+__exportStar(require("./ts/constants"), exports);
+__exportStar(require("./ts/enums"), exports);
+__exportStar(require("./ts/interfaces"), exports);
 exports.version = 'v0.0.1';
