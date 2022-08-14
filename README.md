@@ -9,6 +9,31 @@
 - Plugin system, with ability to create custom plugins.
 - Uses the latest Shoukaku version.
 
+## Documentation
+
+- [Yaboku documentation](https://shrewdness.github.io/yaboku/)
+- [Shoukaku documentation](https://deivu.github.io/Shoukaku/)
+
+## Installation
+
+> Install using npm
+
+```
+npm install --save @shrewdness/yaboku
+```
+
+> Install using yarn
+
+```
+yarn add @shrewdness/yaboku
+```
+
+> Install using pnpm
+
+```
+pnpm add @shrewdness/yaboku
+```
+
 ## Basic usage:
 
 ```typescript
@@ -42,7 +67,7 @@ import {
   YabokuEvents,
   YabokuPlayer,
   YabokuTrack,
-} from 'yaboku';
+} from '@shrewdness/yaboku';
 
 const nodes = [
   {
