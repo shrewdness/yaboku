@@ -10,10 +10,14 @@ import {
   WebSocketClosedEvent,
 } from 'shoukaku';
 import { Connector } from 'shoukaku/dist/src/connectors/Connector';
-import { State } from 'shoukaku/dist/src/Constants';
 import { User } from 'discord.js';
 import { SourceIds } from '../ts/constants';
-import { PlayerUpdateState, SearchResult, YabokuEvents } from '../ts/enums';
+import {
+  PlayerUpdateState,
+  SearchResult,
+  State,
+  YabokuEvents,
+} from '../ts/enums';
 import {
   CreatePlayerOptions,
   PlayerUpdateChannels,

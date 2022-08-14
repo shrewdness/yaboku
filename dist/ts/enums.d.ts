@@ -6,6 +6,12 @@ declare enum PlayerState {
     Destroying = 4,
     Destroyed = 5
 }
+declare enum State {
+    CONNECTING = 0,
+    CONNECTED = 1,
+    DISCONNECTING = 2,
+    DISCONNECTED = 3
+}
 declare enum PlayerUpdateState {
     Unknown = "UNKNOWN",
     Joined = "JOINED",
@@ -52,4 +58,4 @@ declare enum YabokuEvents {
     TrackException = "trackException",
     TrackResolveException = "trackResolveException"
 }
-export { PlayerState, PlayerUpdateState, LoopMode, SearchEngines, SearchResult, YoutubeThumbnailResolution, YabokuEvents, };
+export { PlayerState, State, PlayerUpdateState, LoopMode, SearchEngines, SearchResult, YoutubeThumbnailResolution, YabokuEvents, };

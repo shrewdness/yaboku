@@ -7,6 +7,13 @@ enum PlayerState {
   Destroyed,
 }
 
+enum State {
+  CONNECTING,
+  CONNECTED,
+  DISCONNECTING,
+  DISCONNECTED,
+}
+
 enum PlayerUpdateState {
   Unknown = 'UNKNOWN',
   Joined = 'JOINED',
@@ -61,6 +68,7 @@ enum YabokuEvents {
 
 export {
   PlayerState,
+  State,
   PlayerUpdateState,
   LoopMode,
   SearchEngines,

@@ -5,7 +5,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const events_1 = __importDefault(require("events"));
 const shoukaku_1 = require("shoukaku");
-const Constants_1 = require("shoukaku/dist/src/Constants");
 const constants_1 = require("../ts/constants");
 const enums_1 = require("../ts/enums");
 const _1 = require(".");
@@ -103,7 +102,7 @@ class Yaboku extends events_1.default {
      */
     getLeastUsedNode() {
         const nodes = [...this.shoukaku.nodes.values()];
-        const onlineNodes = nodes.filter((node) => node.state === Constants_1.State.CONNECTED);
+        const onlineNodes = nodes.filter((node) => node.state === enums_1.State.CONNECTED);
         if (!onlineNodes.length) {
             throw new _1.YabokuError(2, "There aren't any nodes online.");
         }

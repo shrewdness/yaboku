@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.YabokuEvents = exports.YoutubeThumbnailResolution = exports.SearchResult = exports.SearchEngines = exports.LoopMode = exports.PlayerUpdateState = exports.PlayerState = void 0;
+exports.YabokuEvents = exports.YoutubeThumbnailResolution = exports.SearchResult = exports.SearchEngines = exports.LoopMode = exports.PlayerUpdateState = exports.State = exports.PlayerState = void 0;
 var PlayerState;
 (function (PlayerState) {
     PlayerState[PlayerState["Connecting"] = 0] = "Connecting";
@@ -11,6 +11,14 @@ var PlayerState;
     PlayerState[PlayerState["Destroyed"] = 5] = "Destroyed";
 })(PlayerState || (PlayerState = {}));
 exports.PlayerState = PlayerState;
+var State;
+(function (State) {
+    State[State["CONNECTING"] = 0] = "CONNECTING";
+    State[State["CONNECTED"] = 1] = "CONNECTED";
+    State[State["DISCONNECTING"] = 2] = "DISCONNECTING";
+    State[State["DISCONNECTED"] = 3] = "DISCONNECTED";
+})(State || (State = {}));
+exports.State = State;
 var PlayerUpdateState;
 (function (PlayerUpdateState) {
     PlayerUpdateState["Unknown"] = "UNKNOWN";

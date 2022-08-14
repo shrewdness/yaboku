@@ -20,4 +20,4 @@ __exportStar(require("./plugins"), exports);
 __exportStar(require("./ts/constants"), exports);
 __exportStar(require("./ts/enums"), exports);
 __exportStar(require("./ts/interfaces"), exports);
-exports.version = 'v0.0.1';
+exports.version = 'v0.0.3';
