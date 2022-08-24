@@ -1,6 +1,6 @@
 {
   "name": "@shrewdness/yaboku",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "A Shoukaku wrapper with built-in queue system.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
