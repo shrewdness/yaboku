@@ -64,7 +64,6 @@ import {
   SearchEngines,
   SearchResult,
   Yaboku,
-  YabokuEvents,
   YabokuPlayer,
   YabokuTrack,
 } from '@shrewdness/yaboku';
@@ -104,19 +103,16 @@ yaboku.shoukaku.on('ready', (nodeName) =>
   console.log(`Node ${nodeName} ready.`),
 );
 
-yaboku.on(
-  YabokuEvents.TrackStart,
-  (player: YabokuPlayer, track: YabokuTrack) => {
-    const channel = client.channels.cache.get(
-      player.textChannelId,
-    ) as TextChannel;
-    if (channel) {
-      channel
-        .send({ content: `Now playing: ${track.title}` })
-        .catch((err) => console.log(err));
-    }
-  },
-);
+yaboku.on('trackStart', (player: YabokuPlayer, track: YabokuTrack) => {
+  const channel = client.channels.cache.get(
+    player.textChannelId,
+  ) as TextChannel;
+  if (channel) {
+    channel
+      .send({ content: `Now playing: ${track.title}` })
+      .catch((err) => console.log(err));
+  }
+});
 
 client.on('messageCreate', async (msg) => {
   if (msg.author.bot) return;
