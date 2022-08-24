@@ -12,12 +12,7 @@ import {
 import { Connector } from 'shoukaku/dist/src/connectors/Connector';
 import { User } from 'discord.js';
 import { SourceIds } from '../ts/constants';
-import {
-  PlayerUpdateState,
-  SearchResult,
-  State,
-  YabokuEvents,
-} from '../ts/enums';
+import { PlayerUpdateState, SearchResult, State } from '../ts/enums';
 import {
   CreatePlayerOptions,
   PlayerUpdateChannels,
@@ -32,7 +27,7 @@ declare interface Yaboku {
    * Emitted when a new track starts playing.
    */
   on(
-    event: YabokuEvents.TrackStart,
+    event: 'trackStart',
     listener: (player: YabokuPlayer, track: YabokuTrack) => void,
   ): this;
 
@@ -40,7 +35,7 @@ declare interface Yaboku {
    * Emitted when a track ends.
    */
   on(
-    event: YabokuEvents.TrackEnd,
+    event: 'trackEnd',
     listener: (player: YabokuPlayer, track: YabokuTrack) => void,
   ): this;
 
@@ -48,7 +43,7 @@ declare interface Yaboku {
    * Emitted when a track gets stuck due to an error.
    */
   on(
-    event: YabokuEvents.TrackStuck,
+    event: 'trackStuck',
     listener: (player: YabokuPlayer, data: TrackStuckEvent) => void,
   ): this;
 
@@ -56,32 +51,29 @@ declare interface Yaboku {
    * Emitted when there is an error caused by a track.
    */
   on(
-    event: YabokuEvents.TrackException,
+    event: 'trackException',
     listener: (player: YabokuPlayer, data: TrackExceptionEvent) => void,
   ): this;
 
   /**
    * Emitted when a new player is created.
    */
-  on(
-    event: YabokuEvents.PlayerCreate,
-    listener: (player: YabokuPlayer) => void,
-  ): this;
+  on(event: 'playerCreate', listener: (player: YabokuPlayer) => void): this;
 
   /**
    * Emitted when a player is updated.
    */
   on(
-    event: YabokuEvents.PlayerUpdate,
+    event: 'playerUpdate',
     listener: (player: YabokuPlayer, data: PlayerUpdate) => void,
   ): this;
 
   /**
-   * Emitted when a player's state is updated. (eg. player left the voice channel, got kicked etc...)
+   * Emitted when a player's state is updated. (eg. player moved to another voice channel, player left...)
    * (THIS EVENT WILL ONLY EVER GET EMITTED WITH THE "PlayerStateUpdatePlugin" PLUGIN ENABLED)
    */
   on(
-    event: YabokuEvents.PlayerStateUpdate,
+    event: 'playerStateUpdate',
     listener: (
       player: YabokuPlayer,
       state: PlayerUpdateState,
@@ -92,24 +84,18 @@ declare interface Yaboku {
   /**
    * Emitted when a player is destroyed.
    */
-  on(
-    event: YabokuEvents.PlayerDestroy,
-    listener: (player: YabokuPlayer) => void,
-  ): this;
+  on(event: 'playerDestroy', listener: (player: YabokuPlayer) => void): this;
 
   /**
    * Emitted when the queue is empty and the player has nothing else to play.
    */
-  on(
-    event: YabokuEvents.PlayerEmpty,
-    listener: (player: YabokuPlayer) => void,
-  ): this;
+  on(event: 'playerEmpty', listener: (player: YabokuPlayer) => void): this;
 
   /**
    * Emitted when the current websocket connection (and player) is closed.
    */
   on(
-    event: YabokuEvents.PlayerClose,
+    event: 'playerClose',
     listener: (player: YabokuPlayer, data: WebSocketClosedEvent) => void,
   ): this;
 }
@@ -122,7 +108,7 @@ class Yaboku extends EventEmitter {
   public readonly players: Map<string, YabokuPlayer> = new Map();
 
   /**
-   * Initialize the Yaboku instance.
+   * Initializes the Yaboku instance.
    * @param yabokuOptions The Yaboku options.
    * @param connector The Shoukaku connector to use.
    * @param nodes An array of lavalink nodes to use.
@@ -157,7 +143,7 @@ class Yaboku extends EventEmitter {
   }
 
   /**
-   * Create a new player.
+   * Creates a new player.
    * @param options The player options.
    * @returns Promise<YabokuPlayer>
    */
@@ -207,12 +193,12 @@ class Yaboku extends EventEmitter {
       finalOptions.data,
     );
     this.players.set(finalOptions.guildId, yabokuPlayer);
-    this.emit(YabokuEvents.PlayerCreate, yabokuPlayer);
+    this.emit('playerCreate', yabokuPlayer);
     return yabokuPlayer;
   }
 
   /**
-   * Get a player by a guildId.
+   * Gets a player by a guildId.
    * @param guildId The id of the guild to get the player of.
    * @returns YabokuPlayer | null
    */
@@ -230,7 +216,7 @@ class Yaboku extends EventEmitter {
   }
 
   /**
-   * Get the least used node.
+   * Gets the least used node.
    * @returns Node
    */
   public getLeastUsedNode(): Node {

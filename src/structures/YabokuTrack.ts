@@ -71,7 +71,7 @@ export default class YabokuTrack {
   }
 
   /**
-   * Get the raw data (json) of a track.
+   * Gets the raw data (json) of a track.
    * @returns {RawYabokuTrack}
    */
   public getRaw(): RawYabokuTrack {
@@ -93,7 +93,7 @@ export default class YabokuTrack {
   }
 
   /**
-   * Set the Yaboku instance.
+   * Sets the Yaboku instance.
    * @param yaboku The Yaboku instance.
    * @returns {YabokuTrack}
    */
@@ -107,7 +107,7 @@ export default class YabokuTrack {
     return this;
   }
 
-  /** Check whether the track is ready to play or needs to be resolved. */
+  /** Checks whether the track is ready to play or needs to be resolved. */
   get readyToPlay(): boolean {
     return (
       this.yaboku !== undefined &&
@@ -123,7 +123,7 @@ export default class YabokuTrack {
   }
 
   /**
-   * Resolve a track.
+   * Resolves a track.
    * @param options Resolve options.
    * @returns {Promise<YabokuTrack>}
    */

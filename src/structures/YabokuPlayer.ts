@@ -6,7 +6,7 @@ import {
   TrackStuckEvent,
   WebSocketClosedEvent,
 } from 'shoukaku';
-import { LoopMode, PlayerState, YabokuEvents } from '../ts/enums';
+import { LoopMode, PlayerState } from '../ts/enums';
 import {
   PlayOptions,
   YabokuPlayerOptions,
@@ -14,6 +14,7 @@ import {
   YabokuSearchResult,
 } from '../ts/interfaces';
 import { Yaboku, YabokuError, YabokuQueue, YabokuTrack } from '.';
+import { YabokuEvents } from '../ts/types';
 
 export default class YabokuPlayer {
   /** YabokuPlayer options. */
@@ -81,7 +82,7 @@ export default class YabokuPlayer {
 
     this.shoukaku.on('start', () => {
       this.playing = true;
-      this.emit(YabokuEvents.TrackStart, this, this.queue.current);
+      this.emit('trackStart', this, this.queue.current);
     });
 
     this.shoukaku.on('end', (data) => {
@@ -90,14 +91,13 @@ export default class YabokuPlayer {
         this.state === PlayerState.Destroyed
       )
         return;
-      if (data.reason === 'REPLACED')
-        this.emit(YabokuEvents.TrackEnd, this, null);
+      if (data.reason === 'REPLACED') this.emit('trackEnd', this, null);
 
       if (['LOAD_FAILED', 'CLEAN_UP'].includes(data.reason)) {
         this.queue.previous = this.queue.current;
         this.playing = false;
-        if (!this.queue.length) this.emit(YabokuEvents.PlayerEmpty, this);
-        this.emit(YabokuEvents.TrackEnd, this);
+        if (!this.queue.length) this.emit('playerEmpty', this);
+        this.emit('trackEnd', this);
         this.queue.current = null;
         this.play().catch(() => null);
       }
@@ -111,30 +111,30 @@ export default class YabokuPlayer {
       const currentTrack = this.queue.current;
       this.queue.current = null;
       if (this.queue.length) {
-        this.emit(YabokuEvents.TrackEnd, this, currentTrack);
+        this.emit('trackEnd', this, currentTrack);
       } else {
         this.playing = false;
-        this.emit(YabokuEvents.PlayerEmpty, this);
+        this.emit('playerEmpty', this);
       }
       this.play().catch(() => null);
     });
 
     this.shoukaku.on('closed', (data: WebSocketClosedEvent) => {
       this.playing = false;
-      this.emit(YabokuEvents.PlayerClose, this, data);
+      this.emit('playerClose', this, data);
     });
 
     this.shoukaku.on('exception', (data: TrackExceptionEvent) => {
       this.playing = false;
-      this.emit(YabokuEvents.TrackException, this, data);
+      this.emit('trackException', this, data);
     });
 
     this.shoukaku.on('update', (data: PlayerUpdate) => {
-      this.emit(YabokuEvents.PlayerUpdate, this, data);
+      this.emit('playerUpdate', this, data);
     });
 
     this.shoukaku.on('stuck', (data: TrackStuckEvent) => {
-      this.emit(YabokuEvents.TrackStuck, this, data);
+      this.emit('trackStuck', this, data);
     });
   }
 
@@ -155,7 +155,7 @@ export default class YabokuPlayer {
   }
 
   /**
-   * Pause the player.
+   * Pauses the player.
    * @param pause Whether to pause or unpause the player.
    * @returns A YabokuPlayer instance.
    */
@@ -171,7 +171,7 @@ export default class YabokuPlayer {
   }
 
   /**
-   * Set the text channel for the player.
+   * Sets the text channel for the player.
    * @param textChannelId The id of the text channel to bind to.
    * @returns A YabokuPlayer instance.
    */
@@ -183,7 +183,7 @@ export default class YabokuPlayer {
   }
 
   /**
-   * Set the voice channel for the player and move the player to it.
+   * Sets the voice channel for the player and move the player to it.
    * @param voiceChannelId The id of the voice channel to move to.
    * @returns A YabokuPlayer instance.
    */
@@ -205,7 +205,7 @@ export default class YabokuPlayer {
   }
 
   /**
-   * Set the loop mode.
+   * Sets the loop mode.
    * @param mode The loop mode to set.
    * @returns A YabokuPlayer instance.
    */
@@ -222,7 +222,7 @@ export default class YabokuPlayer {
   }
 
   /**
-   * Play a track.
+   * Plays a track.
    * @param track The track to play.
    * @param options Play options.
    * @returns A YabokuPlayer instance.
@@ -263,17 +263,12 @@ export default class YabokuPlayer {
     });
 
     if (!resolveResult) {
-      this.emit(
-        YabokuEvents.TrackResolveException,
-        this,
-        current,
-        errorMessage,
-      );
+      this.emit('trackResolveException', this, current, errorMessage);
       this.queue.current = null;
       if (this.queue.size) {
         this.play().catch(() => null);
       } else {
-        this.emit(YabokuEvents.PlayerEmpty, this);
+        this.emit('playerEmpty', this);
       }
       return this;
     }
@@ -288,7 +283,7 @@ export default class YabokuPlayer {
   }
 
   /**
-   * Skip the currently playing track.
+   * Skips the currently playing track.
    * @returns A YabokuPlayer instance.
    */
   public skip(): YabokuPlayer {
@@ -299,7 +294,7 @@ export default class YabokuPlayer {
   }
 
   /**
-   * Set the volume of the player.
+   * Sets the volume of the player.
    * @param volume The volume to set.
    * @returns A YabokuPlayer instance.
    */
@@ -318,7 +313,7 @@ export default class YabokuPlayer {
   }
 
   /**
-   * Connect to the voice channel.
+   * Connects to the voice channel.
    * @returns A YabokuPlayer instance.
    */
   public connect(): YabokuPlayer {
@@ -344,7 +339,7 @@ export default class YabokuPlayer {
   }
 
   /**
-   * Disconnect from the voice channel.
+   * Disconnects from the voice channel.
    * @returns A YabokuPlayer instance.
    */
   public disconnect(): YabokuPlayer {
@@ -370,7 +365,7 @@ export default class YabokuPlayer {
   }
 
   /**
-   * Destroy the player.
+   * Destroys the player.
    * @returns A YabokuPlayer instance.
    */
   public destroy(): YabokuPlayer {
@@ -387,7 +382,7 @@ export default class YabokuPlayer {
     this.yaboku.players.delete(this.guildId);
     this.state = PlayerState.Destroyed;
 
-    this.emit(YabokuEvents.PlayerDestroy, this);
+    this.emit('playerDestroy', this);
 
     return this;
   }

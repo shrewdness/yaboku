@@ -52,20 +52,6 @@ enum YoutubeThumbnailResolution {
   MaxResDefault = 'maxresdefault',
 }
 
-enum YabokuEvents {
-  PlayerCreate = 'playerCreate',
-  PlayerUpdate = 'playerUpdate',
-  PlayerStateUpdate = 'playerStateUpdate',
-  PlayerDestroy = 'playerDestroy',
-  PlayerEmpty = 'playerEmpty',
-  PlayerClose = 'playerClose',
-  TrackStart = 'trackStart',
-  TrackEnd = 'trackEnd',
-  TrackStuck = 'trackStuck',
-  TrackException = 'trackException',
-  TrackResolveException = 'trackResolveException',
-}
-
 export {
   PlayerState,
   State,
@@ -74,5 +60,4 @@ export {
   SearchEngines,
   SearchResult,
   YoutubeThumbnailResolution,
-  YabokuEvents,
 };

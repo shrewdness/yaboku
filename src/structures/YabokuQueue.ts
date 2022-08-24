@@ -28,7 +28,7 @@ export default class YabokuQueue extends Array<YabokuTrack> {
   public previous: YabokuTrack | undefined | null = null;
 
   /**
-   * Add track(s) to the queue.
+   * Adds track(s) to the queue.
    * @param tracks The track or an array of tracks to add to the queue.
    * @returns {YabokuQueue}
    */
@@ -63,7 +63,7 @@ export default class YabokuQueue extends Array<YabokuTrack> {
   }
 
   /**
-   * Remove a track from the queue by its position.
+   * Removes a track from the queue by its position.
    * @param position The position of the track to remove from the queue.
    * @returns {YabokuQueue}
    */
@@ -79,7 +79,7 @@ export default class YabokuQueue extends Array<YabokuTrack> {
   }
 
   /**
-   * Shuffle the queue.
+   * Shuffles the queue.
    * @returns {YabokuQueue}
    */
   public shuffle(): YabokuQueue {
@@ -91,7 +91,7 @@ export default class YabokuQueue extends Array<YabokuTrack> {
   }
 
   /**
-   * Clear the queue.
+   * Clears the queue.
    * @returns {YabokuQueue}
    */
   public clear(): YabokuQueue {

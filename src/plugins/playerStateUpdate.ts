@@ -1,13 +1,13 @@
 import { Client, VoiceState } from 'discord.js';
 import { Yaboku, YabokuPlugin } from '../structures';
-import { PlayerUpdateState, YabokuEvents } from '../ts/enums';
+import { PlayerUpdateState } from '../ts/enums';
 
 export default class PlayerStateUpdatePlugin extends YabokuPlugin {
   /** The Yaboku instance. */
   public yaboku: Yaboku | null = null;
 
   /**
-   * Initialize the plugin.
+   * Initializes the plugin.
    * @param client A discord client instance.
    */
   constructor(public client: Client) {
@@ -15,7 +15,7 @@ export default class PlayerStateUpdatePlugin extends YabokuPlugin {
   }
 
   /**
-   * Load the plugin.
+   * Loads the plugin.
    * @param yaboku The Yaboku instance.
    */
   public load(yaboku: Yaboku): void {
@@ -49,7 +49,7 @@ export default class PlayerStateUpdatePlugin extends YabokuPlugin {
 
     if (state === PlayerUpdateState.Unknown) return;
 
-    this.yaboku.emit(YabokuEvents.PlayerStateUpdate, player, state, {
+    this.yaboku.emit('playerStateUpdate', player, state, {
       oldChannelId,
       newChannelId,
     });
