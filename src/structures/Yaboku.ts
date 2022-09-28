@@ -20,7 +20,7 @@ import {
   YabokuSearchOptions,
   YabokuSearchResult,
 } from '../ts/interfaces';
-import { YabokuPlayer, YabokuTrack, YabokuError, YabokuPlugin } from '.';
+import { YabokuPlayer, YabokuTrack, YabokuError } from '.';
 
 declare interface Yaboku {
   /**
@@ -124,18 +124,14 @@ class Yaboku extends EventEmitter {
     this.shoukaku = new Shoukaku(connector, nodes, shoukakuOptions);
 
     if (this.yabokuOptions.plugins) {
-      for (
-        let index = 0;
-        index < this.yabokuOptions.plugins.length;
-        index += 1
-      ) {
-        if (!(this.yabokuOptions.plugins[index] instanceof YabokuPlugin)) {
+      // eslint-disable-next-line no-restricted-syntax
+      for (const [, plugin] of this.yabokuOptions.plugins.entries()) {
+        if (plugin.constructor.name !== 'YabokuPlugin')
           throw new YabokuError(
             1,
-            'Plugin must be an instance of YabokuPlugin',
+            'Plugin must be an instance of YabokuPlugin.',
           );
-        }
-        this.yabokuOptions.plugins[index].load(this);
+        plugin.load(this);
       }
     }
 
