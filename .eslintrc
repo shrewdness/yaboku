@@ -1,27 +1,9 @@
 {
-  "root": true,
-  "env": {
-    "node": true
-  },
-  "parser": "@typescript-eslint/parser",
+  "extends": ["@shrewdness"],
   "parserOptions": {
     "project": "./tsconfig.json"
   },
-  "plugins": ["@typescript-eslint", "prettier"],
-  "extends": [
-    "airbnb-base",
-    "airbnb-typescript/base",
-    "plugin:@typescript-eslint/recommended",
-    "plugin:@typescript-eslint/recommended-requiring-type-checking",
-    "prettier"
-  ],
   "rules": {
-    "prettier/prettier": "error",
-    "no-console": "off",
-    "import/prefer-default-export": "off",
-    "class-methods-use-this": "off",
-    "import/no-cycle": "off",
-    "no-param-reassign": "off",
     "import/no-extraneous-dependencies": "off"
   }
 }
