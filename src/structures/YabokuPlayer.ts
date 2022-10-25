@@ -1,4 +1,5 @@
 import {
+  Filters,
   Node,
   Player,
   PlayerUpdate,
@@ -142,6 +143,20 @@ export default class YabokuPlayer {
   private emit(event: YabokuEvents, ...args: any): void {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     this.yaboku.emit(event, ...args);
+  }
+
+  /**
+   * Get the current volume of the player.
+   */
+  public get volume(): number {
+    return this.shoukaku.filters.volume;
+  }
+
+  /**
+   * Get the filters applied to the player.
+   */
+  public get filters(): Filters {
+    return this.shoukaku.filters;
   }
 
   private get node(): Node {
