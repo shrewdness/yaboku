@@ -38,7 +38,7 @@ export default class PlayerStateUpdatePlugin extends YabokuPlugin {
     const oldChannelId = oldState.channelId;
     const guildId = newState.guild.id;
 
-    const player = this.yaboku.players.get(guildId);
+    const player = this.yaboku.getPlayer(guildId);
     if (!player) return;
 
     let state = PlayerUpdateState.Unknown;

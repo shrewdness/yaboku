@@ -1,5 +1,6 @@
 import { User } from 'discord.js';
-import { Constructor } from 'shoukaku/dist/src/Utils';
+import type { Snowflake } from 'discord.js';
+import type { Constructor } from './types';
 import { YabokuPlayer, YabokuPlugin, YabokuTrack } from '../structures';
 import {
   SearchEngines,
@@ -10,6 +11,7 @@ import {
 interface YabokuOptions {
   /** Default search engine if no engine was provided. */
   defaultSearchEngine: SearchEngines;
+
   /** Yaboku plugins to load. */
   plugins?: YabokuPlugin[];
 
@@ -31,19 +33,25 @@ interface YabokuOptions {
   };
 
   /** Send payload to guild's shard. */
-  send: (guildId: string, payload: Payload) => void;
+  send: (guildId: Snowflake, payload: Payload) => void;
 }
 
 interface YabokuPlayerOptions {
-  guildId: string;
-  voiceChannelId: string;
-  textChannelId: string;
+  guildId: Snowflake;
+  voiceChannelId: Snowflake;
+  textChannelId: Snowflake;
   selfDeafen: boolean;
+  /**
+   * Whether the player should use the same node for searching tracks and playing tracks.
+   * Default: true
+   */
+  searchWithSameNode?: boolean;
 }
 
 interface YabokuSearchOptions {
   requester: User;
   engine: SearchEngines;
+  nodeName?: string;
 }
 
 interface YabokuSearchResult {
@@ -64,11 +72,11 @@ interface Payload {
 
 interface CreatePlayerOptions {
   /** The id of this guild. */
-  guildId: string;
+  guildId: Snowflake;
   /** The id of the voice channel for the player to join. */
-  voiceChannelId: string;
+  voiceChannelId: Snowflake;
   /** The id of the text channel for player to bind to. */
-  textChannelId: string;
+  textChannelId: Snowflake;
   /** Whether the bot should be deafened. */
   selfDeafen?: boolean;
   /** Whether the bot should be muted. */
@@ -100,8 +108,9 @@ interface RawYabokuTrack {
 }
 
 interface ResolveOptions {
-  overwrite: boolean;
-  forceResolve: boolean;
+  overwrite?: boolean;
+  forceResolve?: boolean;
+  player?: YabokuPlayer;
 }
 
 interface PlayOptions {
@@ -113,8 +122,8 @@ interface PlayOptions {
 }
 
 interface PlayerUpdateChannels {
-  oldVoiceChannelId?: string;
-  newVoiceChannelId?: string;
+  oldVoiceChannelId?: Snowflake;
+  newVoiceChannelId?: Snowflake;
 }
 
 export {

@@ -3,7 +3,8 @@ import { Track } from 'shoukaku';
 import { escapeRegExp, SourceIds, SupportedSources } from '../ts/constants';
 import { SearchEngines } from '../ts/enums';
 import { RawYabokuTrack, ResolveOptions } from '../ts/interfaces';
-import { Yaboku, YabokuError } from '.';
+import { Yaboku, YabokuError, YabokuPlayer } from '.';
+import YabokuUtil from './YabokuUtil';
 
 export default class YabokuTrack {
   /** The Yaboku instance. */
@@ -145,9 +146,12 @@ export default class YabokuTrack {
 
     if (!forceResolve && this.readyToPlay) return this;
     if (resolveSource && this.resolvedBySource) return this;
-    if (resolveSource) this.resolvedBySource = true;
+    if (resolveSource) {
+      this.resolvedBySource = true;
+      return this;
+    }
 
-    const result = await this.getTrack();
+    const result = await this.getTrack(options?.player ?? null);
     if (!result) throw new YabokuError(2, 'No results.');
 
     this.track = result.track;
@@ -166,7 +170,7 @@ export default class YabokuTrack {
     return this;
   }
 
-  private async getTrack(): Promise<Track> {
+  private async getTrack(player: YabokuPlayer | null): Promise<Track> {
     if (!this.yaboku) throw new Error('Yaboku instance is not set.');
 
     const { defaultSearchEngine } = this.yaboku.yabokuOptions;
@@ -178,9 +182,13 @@ export default class YabokuTrack {
 
     if (!node) throw new YabokuError(2, 'No nodes available.');
 
-    const result = await node.rest.resolve(`${source}search:${query}`);
+    const result = player
+      ? await player?.search(`${source}:${query}`)
+      : await node.rest.resolve(`${source}search:${query}`);
     if (!result || !result.tracks.length)
       throw new YabokuError(2, 'No results.');
+
+    result.tracks = result.tracks.map((x) => YabokuUtil.convertTrack(x));
 
     if (this.author) {
       const author = [this.author, `${this.author} - Topic`];

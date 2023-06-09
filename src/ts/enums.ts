@@ -43,13 +43,13 @@ enum YoutubeThumbnailResolution {
   /** Default resolution. */
   Default = 'default',
   /** Standard resolution. */
-  SdDefault = 'sddefault',
+  Standard = 'sddefault',
   /** Medium resolution. */
-  MdDefault = 'mqdefault',
+  Medium = 'mqdefault',
   /** High resolution. */
-  HqDefault = 'hqdefault',
+  High = 'hqdefault',
   /** Maximum resolution. */
-  MaxResDefault = 'maxresdefault',
+  MaxRes = 'maxresdefault',
 }
 
 export {

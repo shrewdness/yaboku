@@ -8,9 +8,9 @@ import {
   TrackExceptionEvent,
   TrackStuckEvent,
   WebSocketClosedEvent,
+  Connector,
 } from 'shoukaku';
-import { Connector } from 'shoukaku/dist/src/connectors/Connector';
-import { User } from 'discord.js';
+import { Snowflake, User } from 'discord.js';
 import { SourceIds } from '../ts/constants';
 import { PlayerUpdateState, SearchResult, State } from '../ts/enums';
 import {
@@ -98,6 +98,11 @@ declare interface Yaboku {
     event: 'playerClose',
     listener: (player: YabokuPlayer, data: WebSocketClosedEvent) => void,
   ): this;
+
+  /**
+   * Emitted when the player resumes connection.
+   */
+  on(event: 'playerResumed', listener: (player: YabokuPlayer) => void): this;
 }
 
 class Yaboku extends EventEmitter {
@@ -149,8 +154,6 @@ class Yaboku extends EventEmitter {
     const exists = this.players.has(options.guildId);
     if (exists) throw new YabokuError(2, 'Player already exists.');
 
-    const finalOptions: CreatePlayerOptions = options;
-
     let node;
     if (options.loadBalance) {
       node = this.getLeastUsedNode();
@@ -160,20 +163,18 @@ class Yaboku extends EventEmitter {
       node = this.shoukaku.getNode('auto');
     }
 
-    if (!options.selfDeafen) finalOptions.selfDeafen = false;
-    if (!options.selfMute) finalOptions.selfMute = false;
+    if (!options.selfDeafen) options.selfDeafen = false;
+    if (!options.selfMute) options.selfMute = false;
 
     if (!node) throw new YabokuError(3, 'No node found.');
 
     const shoukakuPlayer = await node.joinChannel({
-      guildId: finalOptions.guildId,
-      channelId: finalOptions.voiceChannelId,
-      deaf: finalOptions.selfDeafen,
-      mute: finalOptions.selfMute,
+      guildId: options.guildId,
+      channelId: options.voiceChannelId,
+      deaf: options.selfDeafen,
+      mute: options.selfMute,
       shardId:
-        finalOptions.shardId && !Number.isNaN(finalOptions.shardId)
-          ? finalOptions.shardId
-          : 0,
+        options.shardId && !Number.isNaN(options.shardId) ? options.shardId : 0,
     });
 
     const yabokuPlayer = new (this.yabokuOptions.extends?.player ??
@@ -181,14 +182,14 @@ class Yaboku extends EventEmitter {
       this,
       shoukakuPlayer,
       {
-        guildId: finalOptions.guildId,
-        voiceChannelId: finalOptions.voiceChannelId,
-        textChannelId: finalOptions.textChannelId,
-        selfDeafen: finalOptions.selfDeafen || false,
+        guildId: options.guildId,
+        voiceChannelId: options.voiceChannelId,
+        textChannelId: options.textChannelId,
+        selfDeafen: options.selfDeafen || false,
       },
-      finalOptions.data,
+      options.data,
     );
-    this.players.set(finalOptions.guildId, yabokuPlayer);
+    this.players.set(options.guildId, yabokuPlayer);
     this.emit('playerCreate', yabokuPlayer);
     return yabokuPlayer;
   }
@@ -199,15 +200,20 @@ class Yaboku extends EventEmitter {
    * @returns YabokuPlayer | null
    */
   public getPlayer<T extends YabokuPlayer>(
-    guildId: string,
+    guildId: Snowflake,
   ): (T | YabokuPlayer) | null {
     return this.players.get(guildId) || null;
   }
 
-  public destroyPlayer<T extends YabokuPlayer>(guildId: string): void {
+  /**
+   * Destroy a player by a guildId.
+   * @param guildId The id of the guild to destroy the player of.
+   * @returns void
+   */
+  public destroyPlayer<T extends YabokuPlayer>(guildId: Snowflake): void {
     const player = this.getPlayer<T>(guildId);
     if (!player) return;
-    (player as YabokuPlayer).destroy();
+    player.destroy();
     this.players.delete(guildId);
   }
 
@@ -229,11 +235,19 @@ class Yaboku extends EventEmitter {
     return leastUsedNode;
   }
 
+  /**
+   * Search for tracks by query or url.
+   * @param query The query to search for.
+   * @param options Options for the search.
+   * @returns Promise<YabokuSearchResult>
+   */
   public async search(
     query: string,
     options?: YabokuSearchOptions,
   ): Promise<YabokuSearchResult> {
-    const node = this.getLeastUsedNode();
+    const node = options?.nodeName
+      ? this.shoukaku.getNode(options.nodeName)
+      : this.getLeastUsedNode();
     if (!node) throw new YabokuError(3, 'No node found.');
     const sources = SourceIds;
     const sourceSetting =

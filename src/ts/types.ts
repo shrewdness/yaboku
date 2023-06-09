@@ -5,10 +5,13 @@ type YabokuEvents =
   | 'playerDestroy'
   | 'playerEmpty'
   | 'playerClose'
+  | 'playerResumed'
   | 'trackStart'
   | 'trackEnd'
   | 'trackStuck'
   | 'trackException'
   | 'trackResolveException';
 
-export { YabokuEvents };
+type Constructor<T> = new (...args: any[]) => T;
+
+export { YabokuEvents, Constructor };

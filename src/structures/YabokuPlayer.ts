@@ -7,6 +7,7 @@ import {
   TrackStuckEvent,
   WebSocketClosedEvent,
 } from 'shoukaku';
+import type { Snowflake } from 'discord.js';
 import { LoopMode, PlayerState } from '../ts/enums';
 import {
   PlayOptions,
@@ -22,13 +23,13 @@ export default class YabokuPlayer {
   private options: YabokuPlayerOptions;
 
   /** The Yaboku instance. */
-  private yaboku: Yaboku;
+  private readonly yaboku: Yaboku;
 
   /** The Shoukaku player instance. */
   public shoukaku: Player;
 
   /** The id of the guild the player is in. */
-  public readonly guildId: string;
+  public readonly guildId: Snowflake;
 
   /** The id of the voice channel the player is in. */
   public voiceChannelId: string | null;
@@ -79,7 +80,17 @@ export default class YabokuPlayer {
     this.textChannelId = options.textChannelId;
     this.queue = new YabokuQueue();
 
-    this.search = this.yaboku.search.bind(this.yaboku);
+    this.search = (
+      typeof this.options.searchWithSameNode === 'boolean'
+        ? this.options.searchWithSameNode
+        : true
+    )
+      ? (query: string, opt?: YabokuSearchOptions) =>
+          yaboku.search.bind(yaboku)(
+            query,
+            opt ? { ...opt, nodeName: this.shoukaku.node.name } : undefined,
+          )
+      : yaboku.search.bind(yaboku);
 
     this.shoukaku.on('start', () => {
       this.playing = true;
@@ -98,7 +109,7 @@ export default class YabokuPlayer {
         this.queue.previous = this.queue.current;
         this.playing = false;
         if (!this.queue.length) this.emit('playerEmpty', this);
-        this.emit('trackEnd', this);
+        this.emit('trackEnd', this, this.queue.current);
         this.queue.current = null;
         this.play().catch(() => null);
       }
@@ -115,7 +126,7 @@ export default class YabokuPlayer {
         this.emit('trackEnd', this, currentTrack);
       } else {
         this.playing = false;
-        this.emit('playerEmpty', this);
+        return this.emit('playerEmpty', this);
       }
       this.play().catch(() => null);
     });
@@ -137,6 +148,10 @@ export default class YabokuPlayer {
     this.shoukaku.on('stuck', (data: TrackStuckEvent) => {
       this.emit('trackStuck', this, data);
     });
+
+    this.shoukaku.on('resumed', () => {
+      this.emit('playerResumed', this);
+    });
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -150,6 +165,13 @@ export default class YabokuPlayer {
    */
   public get volume(): number {
     return this.shoukaku.filters.volume;
+  }
+
+  /**
+   * Get the current position in a track. (ms)
+   */
+  public get position(): number {
+    return this.shoukaku.position;
   }
 
   /**
@@ -190,7 +212,7 @@ export default class YabokuPlayer {
    * @param textChannelId The id of the text channel to bind to.
    * @returns A YabokuPlayer instance.
    */
-  public setTextChannel(textChannelId: string): YabokuPlayer {
+  public setTextChannel(textChannelId: Snowflake): YabokuPlayer {
     if (this.state === PlayerState.Destroyed)
       throw new YabokuError(1, 'Player is destroyed.');
     this.textChannelId = textChannelId;
@@ -202,7 +224,7 @@ export default class YabokuPlayer {
    * @param voiceChannelId The id of the voice channel to move to.
    * @returns A YabokuPlayer instance.
    */
-  public setVoiceChannel(voiceChannelId: string): YabokuPlayer {
+  public setVoiceChannel(voiceChannelId: Snowflake): YabokuPlayer {
     if (this.state === PlayerState.Destroyed)
       throw new YabokuError(1, 'Player is destroyed.');
     this.state = PlayerState.Connecting;
@@ -232,8 +254,12 @@ export default class YabokuPlayer {
       return this;
     }
 
-    this.loop = mode;
-    return this;
+    if (mode === LoopMode.None || LoopMode.Queue || LoopMode.Track) {
+      this.loop = mode;
+      return this;
+    }
+
+    throw new YabokuError(1, 'Loop mode must be an instance of LoopMode.');
   }
 
   /**
@@ -272,10 +298,12 @@ export default class YabokuPlayer {
 
     let errorMessage: string | undefined;
 
-    const resolveResult = await current.resolveTrack().catch((e: Error) => {
-      errorMessage = e.message;
-      return null;
-    });
+    const resolveResult = await current
+      .resolveTrack({ player: this as YabokuPlayer })
+      .catch((e: Error) => {
+        errorMessage = e.message;
+        return null;
+      });
 
     if (!resolveResult) {
       this.emit('trackResolveException', this, current, errorMessage);
@@ -305,6 +333,42 @@ export default class YabokuPlayer {
     if (this.state === PlayerState.Destroyed)
       throw new YabokuError(1, 'Player is destroyed.');
     this.shoukaku.stopTrack();
+    return this;
+  }
+
+  /**
+   * Seeks to a certain position in a track.
+   * @param position The position in ms to seek to in the track.
+   * @returns A YabokuPlayer instance.
+   */
+  public seek(position: number): YabokuPlayer {
+    if (this.state === PlayerState.Destroyed)
+      throw new YabokuError(1, 'Player is destroyed.');
+
+    if (!this.queue.current)
+      throw new YabokuError(1, "The queue is empty, there's nothing to play.");
+
+    if (!this.queue.current.isSeekable)
+      throw new YabokuError(1, "Current track isn't seekable.");
+
+    position = Number(position);
+
+    if (Number.isNaN(position))
+      throw new YabokuError(1, 'Position must be a valid number.');
+
+    if (position < 0 || position > (this.queue.current.length ?? 0))
+      position = Math.max(
+        Math.min(position, this.queue.current.length ?? 0),
+        0,
+      );
+
+    this.queue.current.position = position;
+    this.send({
+      op: 'seek',
+      guildId: this.guildId,
+      position,
+    });
+
     return this;
   }
 
@@ -392,7 +456,7 @@ export default class YabokuPlayer {
 
     this.disconnect();
     this.state = PlayerState.Destroying;
-    this.shoukaku.connection.destroyLavalinkPlayer();
+    this.shoukaku.connection.disconnect();
     this.shoukaku.removeAllListeners();
     this.yaboku.players.delete(this.guildId);
     this.state = PlayerState.Destroyed;
