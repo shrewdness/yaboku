@@ -16,7 +16,7 @@
   "license": "ISC",
   "prettier": "@shrewdness/prettier-config",
   "devDependencies": {
-    "@shrewdness/eslint-config": "^1.0.0",
+    "@shrewdness/eslint-config": "^1.0.4",
     "@shrewdness/prettier-config": "^1.0.0",
     "@types/node": "^18.7.23",
     "discord.js": "^14.5.0",
