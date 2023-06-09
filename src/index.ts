@@ -3,4 +3,3 @@ export * as YabokuPlugins from './plugins';
 export * from './ts/constants';
 export * from './ts/enums';
 export * from './ts/interfaces';
-export { Connectors } from 'shoukaku';
